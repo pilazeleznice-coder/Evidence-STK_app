@@ -17,7 +17,7 @@ Ve formuláři nového i upravovaného vozidla použijte fotoaparát nebo fotku 
 Kategorie: Auto, Přívěs, Traktor, Vlek, Motorka, Nakladač.
 
 ## Živá čtečka (v3)
-Tlačítko Spustit živou čtečku otevírá kameru přes getUserMedia (HTTPS, oprávnění uživatele). Namiřte značku do rámečku; po 3 shodných výsledcích s dostatečnou jistotou se text doplní. Kamera se vypne při zachycení, zavření formuláře, zastavení či přepnutí aplikace do pozadí. V případě problému zůstává fotka a ruční vstup. Záznamy se neodesílají na server. Knihovna/model OCR vyžaduje internet při načítání. Nejde o specializovaný certifikovaný ANPR systém; rychlost a přesnost závisí na telefonu a záběru.
+Tlačítko Spustit živou čtečku otevírá kameru přes getUserMedia (HTTPS, oprávnění uživatele). Namiřte značku do rámečku; po 3 až 4 opakovaných shodných výsledcích se text doplní. Kamera se vypne při zachycení, zavření formuláře, zastavení či přepnutí aplikace do pozadí. V případě problému zůstává fotka a ruční vstup. Záznamy se neodesílají na server. Knihovna/model OCR vyžaduje internet při načítání. Nejde o specializovaný certifikovaný ANPR systém; rychlost a přesnost závisí na telefonu a záběru.
 
 Automatický výběr světlé/žluté oblasti, narovnání a kontrast pomáhají u starších žlutých značek. Jeden a dva řádky mají samostatný režim; starší dvouřádkové značky se skládají z obou řádků. Záměny O/0 a I/1 nejsou potichu opravovány. Vždy ověřte výsledek. Fyzickou kameru a ostření je nutné vyzkoušet na cílovém telefonu; testovací snímek nenahrazuje tuto zkoušku.
 
@@ -25,3 +25,6 @@ Automatický výběr světlé/žluté oblasti, narovnání a kontrast pomáhají
 Lokální vyhledávání ve 15 068 modelech, 934 značkách z VehiclesDB v2026.10.3. Vybraná značka, model a dostupné logo se ukládají k vozidlu. Původní názvy, fotky a historie zůstávají zachovány. Motorizace, výbavy, traktory a pracovní stroje nejsou úplně pokryté; lze dál psát vlastní názvy. Katalog nevyhledává konkrétní vozidlo podle SPZ a není propojením s ParkSimply.
 
 Vehicle data by [VehiclesDB](https://vehiclesdb.com), CC BY 4.0. Upraveno na pole pro našeptávání; přiřazeny veřejné odkazy na loga výrobců. Úplná upozornění a zdroje: [THIRD_PARTY.md](THIRD_PARTY.md).
+
+## Oprava čtečky v4
+Čtečku otevírá ikona fotoaparátu přímo vedle SPZ do samostatného dialogu. Průběžný výsledek lze potvrdit tlačítkem Použít SPZ. Automatické doplnění už není trvale blokováno nulovým skóre jistoty, které OCR někdy vrací při omezené sadě znaků: nízké skóre vyžaduje čtyři shodné výsledky v pěti snímcích, vyšší skóre tři. Výřez videa odpovídá centrovanému zobrazení object-fit: cover. Simulovaný živý průchod ověřil doplnění po čtyřech snímcích s confidence 0, zastavení stop kamery a odstranění čtečky při zavření formuláře. Fyzické ostření a konkrétní telefon vyžadují zkoušku na zařízení.
