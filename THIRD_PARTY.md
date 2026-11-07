@@ -153,3 +153,12 @@ records (make/model string normalization, deduplication, taxonomy
 assignment). Counts are transformed into ranks/deciles. Errors are ours,
 not the sources'.
 
+
+## Manufacturer model name extensions (2026-11-07)
+The following additions contain selected model identifiers only, not technical specifications, photographs or claims of database completeness. Source URLs are attached to each added model record. Vehicle brand names identify their respective manufacturers.
+
+- Manitou: https://mltx.manitou.com/ and https://www.manitou.com/en-GB/our-machines/fixed-telehandlers and https://www.manitou.com/en-CZ/our-machines/fixed-telehandlers?family=construction-telehandlers
+- John Deere: https://www.deere.ca/en/tractors/utility-tractors/6-family-utility-tractors/6m-series-overview/ and https://www.deere.ca/en/tractors/utility-tractors/6-family-utility-tractors/ and https://www.deere.com/assets/pdfs/common/qrg/5e-stage-iiib-stage-v-5050e-5058e.pdf
+- Jawa: https://www.jawa.eu/ and https://www.jawa.eu/motocykly-jawa
+- Pronar: https://pronar.pl/pdf/Katalog_PRZYCZEPY-PRONAR_2026.pdf
+- Thule 1205 S: Slovak official commercial gazette, issue published 22 December 2023, https://obchodnyvestnik.justice.gov.sk/ObchodnyVestnik/Web/Stiahnut.aspx?IdOvSubor=151089 (model designation only). Other historical Thule trailer designations are deliberately left for manual entry; current Brenderup models are not relabelled as Thule.

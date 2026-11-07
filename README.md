@@ -28,3 +28,8 @@ Vehicle data by [VehiclesDB](https://vehiclesdb.com), CC BY 4.0. Upraveno na pol
 
 ## Oprava čtečky v4
 Čtečku otevírá ikona fotoaparátu přímo vedle SPZ do samostatného dialogu. Průběžný výsledek lze potvrdit tlačítkem Použít SPZ. Automatické doplnění už není trvale blokováno nulovým skóre jistoty, které OCR někdy vrací při omezené sadě znaků: nízké skóre vyžaduje čtyři shodné výsledky v pěti snímcích, vyšší skóre tři. Výřez videa odpovídá centrovanému zobrazení object-fit: cover. Simulovaný živý průchod ověřil doplnění po čtyřech snímcích s confidence 0, zastavení stop kamery a odstranění čtečky při zavření formuláře. Fyzické ostření a konkrétní telefon vyžadují zkoušku na zařízení.
+
+## Rozšíření katalogu v5
+Doplněno 77 zdrojově doložených položek pro Manitou (nakladače/manipulátory), John Deere (traktory), Jawa (aktuální i historické motocykly), Pronar (zemědělské přívěsy) a Thule (starší nákladní přívěs 1205 S). Jde o výběr modelů, nikoli úplnou historickou databázi všech variant. Každý přidaný řádek má vlastní zdrojovou URL ve čtvrtém poli vehicle-catalog.json. Základ VehiclesDB se zachoval.
+
+Výběr jiné kategorie už neblokuje dohledání značky: kompatibilní výsledky se řadí první a zvolený model případně nastaví odpovídající kategorii. Zápisy JohnDeere, johndeer, John Deer a modely s odlišnými mezerami či lomítky jsou podporovány. U všech pěti výrobců lze zvolit samotnou značku a dopsat vlastní model. Takový výběr je výslovně označen jako Vlastní model. Loga jsou použita pouze tam, kde existují v původním katalogu.
