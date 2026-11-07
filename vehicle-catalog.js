@@ -2,7 +2,7 @@
 let stkCatalogPromise;
 const stkFold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 function stkCatalog() {
-  if (!stkCatalogPromise) stkCatalogPromise = fetch('./vehicle-catalog.json').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(data => {
+  if (!stkCatalogPromise) stkCatalogPromise = fetch('./vehicle-catalog.json?v=6').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(data => {
     const makes = new Map(data.makes.map(m => [m[0], {slug:m[0],name:m[1],logo:m[2],kind:m[3]?.kind}]));
     const records = data.models.map(m => ({...makes.get(m[0]),model:m[1],kind:m[2],key:stkFold(makes.get(m[0]).name+' '+m[1])}));
     const custom=[...makes.values()].filter(m=>m.kind).map(m=>({...m,model:'',key:stkFold(m.name),custom:true}));return {makes,records:[...records,...custom]};
@@ -21,10 +21,10 @@ function stkSearchModels(records,query,type){
     .sort((a,b)=>Number(stkKindCompatible(b.kind,type))-Number(stkKindCompatible(a.kind,type))||Number(b.custom)-Number(a.custom)||Number(b.key.startsWith(canonical))-Number(a.key.startsWith(canonical))||a.key.localeCompare(b.key)).slice(0,12);
 }
 function stkBrandBadge(x) {
-  const name=x.make||'',url=x.makeLogo||'';
+  const name=x.make||'',localBrand={'manitou':'manitou.png','john-deere':'john-deere.svg','jawa':'jawa.png','thule':'thule.svg','pronar':'pronar.png'};const slug=x.makeSlug||stkFold(name).replace(/\s+/g,'-'),url=localBrand[slug]?'brand-logos/'+localBrand[slug]:(x.makeLogo||'');
   if(!name)return '';
   // Only catalogue-owned logo origins are accepted, never arbitrary imported HTML/URLs.
-  const safe=/^https:\/\/raw\.githubusercontent\.com\/filippofilip95\/car-logos-dataset\/master\/logos\/thumb\/[a-z0-9-]+\.png$/.test(url);
+  const safe=/^brand-logos\/(?:manitou|john-deere|jawa|thule|pronar)\.(?:png|svg)$/.test(url)||/^https:\/\/raw\.githubusercontent\.com\/filippofilip95\/car-logos-dataset\/master\/logos\/thumb\/[a-z0-9-]+\.png$/.test(url);
   return `<span class="manufacturer">${safe?`<img src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}<span>${esc(name)}</span></span>`;
 }
 function bindVehicleCatalog(form, existing) {

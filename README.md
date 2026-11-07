@@ -1,35 +1,54 @@
-# Evidence STK
+# Evidence STK – Pila Železnice
 
-Evidence firemních vozidel a přívěsů Pily Železnice. Instalovatelná PWA pro Chrome a Android, lokální evidence s fotografiemi, historií a exportem zálohy.
+Instalovatelná aplikace pro firemní vozidla, přívěsy, vleky, traktory, motocykly a nakladače.
 
-## Nasazení
-Vytvořte repozitář `Evidence-STK_app` na účtu `pilazeleznice-coder`. Nahrajte obsah této složky do kořene větve `main`. V Settings → Pages zvolte Deploy from a branch → main → /(root). Po nasazení otevřete https://pilazeleznice-coder.github.io/Evidence-STK_app/ a zvolte Nainstalovat.
+Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 
-ID aplikace: `/Evidence-STK_app/`. Stabilní a odlišné od ostatních aplikací. Ikony 192 a 512 px: bílý nápis STK na zeleném pozadí.
+## Funkce
 
-Data se ukládají pouze v prohlížeči tohoto zařízení. Pravidelně stahujte JSON zálohu. Odinstalace, vymazání dat prohlížeče nebo změna domény mohou data odstranit. Cloudové sdílení, import zálohy a automatické notifikace zatím nejsou implementované.
+- Místní evidence SPZ, názvu, kategorie, fotografií, termínů STK/emisí a historie kontrol.
+- Měsíc a rok, měsíc slovně. Řazení orientačně ke konci měsíce; přesnou právní platnost určují doklady.
+- Živá čtečka přes ikonu fotoaparátu u SPZ; jeden i dva řádky, žluté značky, foto jako alternativa. Výsledek vždy ověřte. Fyzické ostření a přesnost je nutné vyzkoušet na konkrétním telefonu.
+- Katalog značek/modelů VehiclesDB a vybrané zdrojově doložené modely Manitou, John Deere, Jawa, Thule a Pronar. Nejde o úplnou historickou databázi ani registr podle SPZ. Vlastní typ lze dopsat.
+- Loga pěti uvedených výrobců jsou součástí aplikace v brand-logos/; nejsou závislá na cizích serverech. Loga jsou pouze identifikace výrobce, nikoli vyjádření spolupráce.
+- Záloha JSON včetně místních fotografií. Import zálohy a automatické notifikace zatím nejsou implementovány.
 
-Termín se zadává jako měsíc a rok. Pro orientační řazení se používá konec tohoto měsíce; aplikace neurčuje právní platnost STK.
+## Cloud
 
-## Rozpoznávání SPZ
-Ve formuláři nového i upravovaného vozidla použijte fotoaparát nebo fotku ze zařízení. Označte pouze značku a spusťte OCR. Výsledek lze opravit a až tlačítkem Použít SPZ přenést do formuláře. Obrázky zpracovává Tesseract.js 5.1.1 v zařízení, neodesílají se na server. Načtení OCR knihovny a jazykových dat vyžaduje internet. Kvalita závisí na světle, ostrosti a výřezu; nejde o ověření značky v registru. Fyzický fotoaparát telefonu je třeba ověřit na cílovém zařízení.
+STK používá existující Supabase projekt **Evidence-app** (`ctlweepsrdjrytisyvsk`), nikoli další projekt. Zdrojový návrh vychází z aktuálních souborů cloud-auth.js, sync-model.js, sync-client.js a SQL synchronizace v repozitáři evidence-rozvozu-app.
 
-Kategorie: Auto, Přívěs, Traktor, Vlek, Motorka, Nakladač.
+V Nastavení se přihlaste stejným účtem jako v Evidenci rozvozů. Při stejném původu GitHub Pages lze existující session převzít díky stejnému Auth storageKey `pzEvidenceAuthV1` a SDK 2.117.3. Obě aplikace sdílejí přihlášení; odhlášení v tomto prohlížeči se může projevit i v Evidenci rozvozů. Pouze publishable key je v cloud-config.js. Žádný service-role klíč není v klientovi.
 
-## Živá čtečka (v3)
-Tlačítko Spustit živou čtečku otevírá kameru přes getUserMedia (HTTPS, oprávnění uživatele). Namiřte značku do rámečku; po 3 až 4 opakovaných shodných výsledcích se text doplní. Kamera se vypne při zachycení, zavření formuláře, zastavení či přepnutí aplikace do pozadí. V případě problému zůstává fotka a ruční vstup. Záznamy se neodesílají na server. Knihovna/model OCR vyžaduje internet při načítání. Nejde o specializovaný certifikovaný ANPR systém; rychlost a přesnost závisí na telefonu a záběru.
+### Oddělení dat
 
-Automatický výběr světlé/žluté oblasti, narovnání a kontrast pomáhají u starších žlutých značek. Jeden a dva řádky mají samostatný režim; starší dvouřádkové značky se skládají z obou řádků. Záměny O/0 a I/1 nejsou potichu opravovány. Vždy ověřte výsledek. Fyzickou kameru a ostření je nutné vyzkoušet na cílovém telefonu; testovací snímek nenahrazuje tuto zkoušku.
+- Samostatné tabulky `stk_sync_clock`, `stk_sync_entries`, `stk_sync_history`, RPC `stk_sync_apply`.
+- Soukromý bucket `stk-photos`, limit fotografie 10 MB, typy JPEG/PNG/WebP/GIF.
+- Žádné změny tabulek, RPC, příloh ani synchronizačních záznamů Evidence rozvozů.
+- RLS omezuje každý záznam a cestu fotografie na přihlášeného vlastníka. Jiné účty se automaticky nesdílejí.
 
-## Katalog značek a modelů
-Lokální vyhledávání ve 15 068 modelech, 934 značkách z VehiclesDB v2026.10.3. Vybraná značka, model a dostupné logo se ukládají k vozidlu. Původní názvy, fotky a historie zůstávají zachovány. Motorizace, výbavy, traktory a pracovní stroje nejsou úplně pokryté; lze dál psát vlastní názvy. Katalog nevyhledává konkrétní vozidlo podle SPZ a není propojením s ParkSimply.
+### Synchronizace a zachování dat
 
-Vehicle data by [VehiclesDB](https://vehiclesdb.com), CC BY 4.0. Upraveno na pole pro našeptávání; přiřazeny veřejné odkazy na loga výrobců. Úplná upozornění a zdroje: [THIRD_PARTY.md](THIRD_PARTY.md).
+- Změny jsou nejdřív místní. Fronta změn, revize a checkpoint před prvním propojením jsou v IndexedDB `pila-stk-cloud-v1`.
+- Po prvním přihlášení se místní evidence odešle; původní záloha je dostupná v Nastavení. Staré záznamy dostanou stabilní ID odvozené z SPZ, nové UUID. Souběžné rozdílné verze stejného starého záznamu vyvolají konflikt, nepřepisují se potichu.
+- Serverové revize, nikoli hodiny zařízení, určují pořadí změn. Při konfliktu lze zvolit místní nebo serverovou verzi. Starší verze zůstávají v serverové historii.
+- Příchozí změny se nepoužijí přes otevřený formulář. Po jeho zavření a další synchronizaci se stáhnou.
+- Fotografie se ukládají do soukromého bucketu podle SHA-256, payload obsahuje pouze manifest. Fotky se ověřují hashem a velikostí, nejsou veřejné. Původní data URL zůstává dostupná místně pro offline režim a zálohy.
+- Nově vybírané fotografie se zmenší na nejvýše 1600 px pro úsporu místa. Původní fotografie se při migraci nepřepisují.
+- Offline změny čekají na připojení. Ruční synchronizace a přepínač automatické synchronizace jsou v Nastavení; automatická kontrola běží v popředí každých 20 s.
 
-## Oprava čtečky v4
-Čtečku otevírá ikona fotoaparátu přímo vedle SPZ do samostatného dialogu. Průběžný výsledek lze potvrdit tlačítkem Použít SPZ. Automatické doplnění už není trvale blokováno nulovým skóre jistoty, které OCR někdy vrací při omezené sadě znaků: nízké skóre vyžaduje čtyři shodné výsledky v pěti snímcích, vyšší skóre tři. Výřez videa odpovídá centrovanému zobrazení object-fit: cover. Simulovaný živý průchod ověřil doplnění po čtyřech snímcích s confidence 0, zastavení stop kamery a odstranění čtečky při zavření formuláře. Fyzické ostření a konkrétní telefon vyžadují zkoušku na zařízení.
+## Nasazení databáze
 
-## Rozšíření katalogu v5
-Doplněno 77 zdrojově doložených položek pro Manitou (nakladače/manipulátory), John Deere (traktory), Jawa (aktuální i historické motocykly), Pronar (zemědělské přívěsy) a Thule (starší nákladní přívěs 1205 S). Jde o výběr modelů, nikoli úplnou historickou databázi všech variant. Každý přidaný řádek má vlastní zdrojovou URL ve čtvrtém poli vehicle-catalog.json. Základ VehiclesDB se zachoval.
+`supabase/setup-stk.sql` je reprodukovatelný SQL podklad vytvoření samostatné části STK. Na aktivním projektu již byla aplikována migrace `add_stk_cloud_sync`; setup nespouštějte znovu na existujících tabulkách. Po změnách byly ověřeny RLS i advisory hlášení – část STK nepřidává nové nálezy.
 
-Výběr jiné kategorie už neblokuje dohledání značky: kompatibilní výsledky se řadí první a zvolený model případně nastaví odpovídající kategorii. Zápisy JohnDeere, johndeer, John Deer a modely s odlišnými mezerami či lomítky jsou podporovány. U všech pěti výrobců lze zvolit samotnou značku a dopsat vlastní model. Takový výběr je výslovně označen jako Vlastní model. Loga jsou použita pouze tam, kde existují v původním katalogu.
+## Ověření cloudové části
+
+- Skutečná databáze: vložení/změna, odmítnutí zastaralé revize, historie, izolace dvou účtů. Syntetické účty i data byly v transakci rollbacknuty.
+- Skutečná Storage RLS: vlastní fotografie, odmítnutí cizí cesty a čtení jiným účtem, bez trvalých testovacích objektů.
+- Klientský integrační test s napodobeným serverem/IndexedDB: offline fronta, fotografie mimo JSON payload, druhé zařízení, ověření integrity a konflikt, odložení aplikace změn při otevřeném formuláři.
+- Koncové přihlášení a propojení uživatelových skutečných zařízení vyžaduje jeho existující účet Evidence; žádná hesla se nezapisují do zdrojů.
+
+## PWA a zdroje
+
+Stabilní ID `/Evidence-STK_app/`, ikony 192 a 512 px s bílým STK na zelené. Zdroj je v kořeni větve main, GitHub Pages používá main / root. Uživatelská data nejsou v GitHub repozitáři.
+
+Vehicle data by [VehiclesDB](https://vehiclesdb.com), CC BY 4.0. Zdroje doplněných modelů jsou u záznamů katalogu; úplná upozornění a zdroje v [THIRD_PARTY.md](THIRD_PARTY.md). SDK licence v [vendor/LICENSES.txt](vendor/LICENSES.txt).

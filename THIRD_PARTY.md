@@ -162,3 +162,14 @@ The following additions contain selected model identifiers only, not technical s
 - Jawa: https://www.jawa.eu/ and https://www.jawa.eu/motocykly-jawa
 - Pronar: https://pronar.pl/pdf/Katalog_PRZYCZEPY-PRONAR_2026.pdf
 - Thule 1205 S: Slovak official commercial gazette, issue published 22 December 2023, https://obchodnyvestnik.justice.gov.sk/ObchodnyVestnik/Web/Stiahnut.aspx?IdOvSubor=151089 (model designation only). Other historical Thule trailer designations are deliberately left for manual entry; current Brenderup models are not relabelled as Thule.
+
+## Bundled manufacturer marks
+- Manitou: official https://mltx.manitou.com/assets/im/logo.png (displayed on a red backing for visibility).
+- Pronar: official https://pronar.pl/wp-content/uploads/2013/09/logo2013.png
+- Jawa: https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/thumb/jawa.png
+- John Deere: Simple Icons v14.0.0, https://github.com/simple-icons/simple-icons/blob/14.0.0/icons/johndeere.svg (Simple Icons assets are CC0; manufacturer trademark rights remain).
+- Thule: Thule Sweden AB mark, https://commons.wikimedia.org/wiki/File:Thule_Brand_Logo_03.2023.svg (PD-textlogo, trademark).
+All marks identify selected manufacturers; no endorsement or affiliation is claimed.
+
+## Cloud SDK and shared synchronization logic
+Supabase JS 2.117.3 browser bundle and its notices were copied unchanged from pilazeleznice-coder/evidence-rozvozu-app. See vendor/LICENSES.txt for the upstream MIT notices. sync-model.js reuses the same reconciliation algorithm with a separate STK global namespace; its database namespace is independent.
