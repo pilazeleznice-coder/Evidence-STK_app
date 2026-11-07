@@ -74,7 +74,7 @@ function bindSpzScanner(host,plateInput){
       await work.setParameters({tessedit_pageseg_mode:'6'});
     }
     return work.recognize(prepared);}
-  function withTimeout(job,token){return Promise.race([job,new Promise((_,reject)=>{requestTimer=setTimeout(()=>{if(token===generation){stop('Čtečka nereaguje. Zkontrolujte internet a spusťte ji znovu.');reject(Error('Čtečka nereaguje. Zkontrolujte internet a spusťte ji znovu.'));}},60000);})]).finally(()=>clearTimeout(requestTimer));}
+  function withTimeout(job,token){let timer;return Promise.race([job,new Promise((_,reject)=>{timer=setTimeout(()=>{if(token===generation){stop('Čtečka nereaguje. Zkontrolujte internet a spusťte ji znovu.');reject(Error('Čtečka nereaguje. Zkontrolujte internet a spusťte ji znovu.'));}},60000);})]).finally(()=>clearTimeout(timer));}
   function apply(value,automatic=false){plateInput.value=value;plateInput.dispatchEvent(new Event('input',{bubbles:true}));result.hidden=true;q('[data-editor]').hidden=true;stop();message(automatic?'SPZ automaticky načtena. Zkontrolujte ji před uložením.':'SPZ doplněna. Zkontrolujte ji před uložením.');if(panel.open)panel.close();plateInput.focus();toast('SPZ doplněna: '+value);}
   function showResult(candidates){result.hidden=false;q('[data-value]').value=candidates[0]||'';const list=q('[data-candidates]');list.replaceChildren();candidates.forEach(value=>{const b=document.createElement('button');b.type='button';b.className='btn light';b.textContent=value;b.onclick=()=>q('[data-value]').value=value;list.append(b);});}
   function guide(){const layout=q('[data-layout]').value;q('.spz-guide').style.aspectRatio=layout==='single'?'4.5':layout==='double'?'1.35':'2';}
