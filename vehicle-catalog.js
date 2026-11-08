@@ -2,8 +2,8 @@
 let stkCatalogPromise;
 const stkFold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 function stkCatalog() {
-  if (!stkCatalogPromise) stkCatalogPromise = fetch('./vehicle-catalog.json?v=9').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(data => {
-    const makes = new Map(data.makes.map(m => [m[0], {slug:m[0],name:m[1],logo:m[2],kind:m[3]?.kind}]));
+  if (!stkCatalogPromise) stkCatalogPromise = fetch('./vehicle-catalog.json?v=14').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(data => {
+    const makes = new Map(data.makes.map(m => [m[0], {slug:m[0],name:m[1],logo:m[2],kind:m[3]?.kind,aliases:m[3]?.aliases||[]}]));
     const records = data.models.map(m => ({...makes.get(m[0]),model:m[1],kind:m[2],key:stkFold(makes.get(m[0]).name+' '+m[1])}));
     const custom=[...makes.values()].filter(m=>m.kind).map(m=>({...m,model:'',key:stkFold(m.name),custom:true}));return {makes,records:[...records,...custom]};
   }).catch(e=>{stkCatalogPromise=null;throw e;});
@@ -15,10 +15,11 @@ function stkSearchModels(records,query,type){
   const canonical=stkFold(query).replace(/john[\s-]*deer(?!e)/g,'john deere');
   const compact=s=>stkFold(s).replace(/[^a-z0-9]/g,'');
   const terms=canonical.split(/\s+/).map(compact).filter(Boolean);if(!terms.length)return [];
+  const brandOnly=r=>r.custom&&[r.name,...(r.aliases||[])].some(a=>compact(a)===compact(canonical));
   const seen=new Set();return records.filter(r=>{
-    const key=compact(r.key),brand=compact(r.name);return terms.every(t=>key.includes(t))||(r.custom&&compact(canonical).startsWith(brand));
+    const key=compact(r.key),aliases=(r.aliases||[]).map(compact),brand=compact(r.name);return terms.every(t=>key.includes(t)||aliases.some(a=>a.includes(t)))||(r.custom&&compact(canonical).startsWith(brand));
   }).filter(r=>{const id=compact(r.key)+(r.custom?'custom':'');if(seen.has(id))return false;seen.add(id);return true;})
-    .sort((a,b)=>Number(stkKindCompatible(b.kind,type))-Number(stkKindCompatible(a.kind,type))||Number(b.custom)-Number(a.custom)||Number(b.key.startsWith(canonical))-Number(a.key.startsWith(canonical))||a.key.localeCompare(b.key)).slice(0,12);
+    .sort((a,b)=>Number(!!brandOnly(b))-Number(!!brandOnly(a))||Number(stkKindCompatible(b.kind,type))-Number(stkKindCompatible(a.kind,type))||Number(!!a.custom)-Number(!!b.custom)||Number(b.key.startsWith(canonical))-Number(a.key.startsWith(canonical))||a.key.localeCompare(b.key)).slice(0,12);
 }
 function stkBrandBadge(x) {
   const name=x.make||'',localBrand={'manitou':'manitou.png','john-deere':'john-deere.svg','jawa':'jawa.png','thule':'thule.svg','pronar':'pronar.png','zetor':'zetor.png'};const slug=x.makeSlug||stkFold(name).replace(/\s+/g,'-'),url=localBrand[slug]?'brand-logos/'+localBrand[slug]:(x.makeLogo||'');
