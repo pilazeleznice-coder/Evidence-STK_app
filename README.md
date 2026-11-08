@@ -52,3 +52,8 @@ V Nastavení se přihlaste stejným účtem jako v Evidenci rozvozů. Při stejn
 Stabilní ID `/Evidence-STK_app/`, ikony 192 a 512 px s bílým STK na zelené. Zdroj je v kořeni větve main, GitHub Pages používá main / root. Uživatelská data nejsou v GitHub repozitáři.
 
 Vehicle data by [VehiclesDB](https://vehiclesdb.com), CC BY 4.0. Zdroje doplněných modelů jsou u záznamů katalogu; úplná upozornění a zdroje v [THIRD_PARTY.md](THIRD_PARTY.md). SDK licence v [vendor/LICENSES.txt](vendor/LICENSES.txt).
+
+## Čtečka malého technického průkazu
+Ve formuláři vozidla zvolte Načíst malý technický průkaz. Vyfoťte/vyberte přední stranu, načtěte ji, poté stejným způsobem zadní. Fotku lze otočit. Výsledek je návrh a vyžaduje výslovnou kontrolu před přenesením do formuláře; uložení vozidla je samostatný krok. Podporovány jsou standardní kódy polí A, D.1, D.3, E/VIN, J a druh vozidla z ORV. Není to ověření pravosti dokladu ani dotaz do registru. OCR probíhá lokálně, knihovna a jazyková data se stáhnou při prvním spuštění. Fotky ani celý OCR text se neukládají; do evidence se po potvrzení uloží jen vybrané údaje vozidla. Datum registrace ani H (platnost dokladu) se nepoužívají jako STK.
+
+Vzhled používá primární barvu #104c29 převzatou z Evidence rozvozů.

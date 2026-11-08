@@ -175,3 +175,5 @@ All marks identify selected manufacturers; no endorsement or affiliation is clai
 Supabase JS 2.117.3 browser bundle and its notices were copied unchanged from pilazeleznice-coder/evidence-rozvozu-app. See vendor/LICENSES.txt for the upstream MIT notices. sync-model.js reuses the same reconciliation algorithm with a separate STK global namespace; its database namespace is independent.
 
 Zetor: logo from https://www.zetor.cz/pro-media (ZETOR TRACTORS a.s.; trademark). Selected tractor model names from https://www.zetor.cz/produkty and the official Zetor model shop https://www.eshop.zetor.cz/cs/hracky-a-modely/modely-traktoru-zetor/. Additional types can be entered manually.
+
+Registration scanner field codes: official Czech Ministry of Transport specimens (ORV 2024, 2015, 2005): https://md.gov.cz/getattachment/Dokumenty/Silnicni-doprava/Registrace-vozidel/Prehled-platnych-ceskych-registracnich-dokladu-voz/__Prehled-platnych-registracnich-dokladu-vozidel-CZ.pdf.aspx . Specimen photos are not bundled. OCR uses Tesseract.js 5.1.1 (existing loader), Czech and English trained data downloaded on demand; image recognition stays on device.
