@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "updated": "2026-11-08",
+  "manufacturers": [
+    {
+      "name": "Manitou",
+      "country": "Francie",
+      "catalog": "https://mltx.manitou.com/",
+      "logo": "brand-logos/manitou.png",
+      "logoUrl": "https://mltx.manitou.com/assets/im/logo.png",
+      "feeds": [
+        {
+          "url": "https://mltx.manitou.com/",
+          "parser": "manitou",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "ok",
+          "sha256": "b307fc129ef9dce800cb952ed06b0622e4d694c5ccb3630288de6210558d5f50",
+          "importedAt": "2026-11-08T18:45:24.675977+00:00"
+        }
+      ],
+      "slug": "manitou",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "John Deere",
+      "country": "USA",
+      "catalog": "https://www.deere.cz/cs-cz",
+      "logo": "brand-logos/john-deere.svg#green",
+      "logoUrl": "https://cdn-ux.deere.com/brand-foundations/2.0.0/logos/jd-logo.svg#green",
+      "feeds": [
+        {
+          "url": "https://www.deere.ca/en/tractors/utility-tractors/6-family-utility-tractors/6m-series-overview/",
+          "parser": "seeds",
+          "format": "html",
+          "models": [
+            "6M 95",
+            "6M 105",
+            "6M 110",
+            "6M 115",
+            "6M 120",
+            "6M 125",
+            "6M 130"
+          ],
+          "verification": "official-catalog",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "unavailable"
+        }
+      ],
+      "slug": "john-deere",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "Jawa",
+      "manufacturer": "JAWA Moto spol. s r. o.",
+      "country": "Česko",
+      "catalog": "https://www.jawa.eu/motocykly-jawa",
+      "logo": "brand-logos/jawa.png",
+      "logoUrl": "https://www.jawa.eu/data/filecache/96/logo.png",
+      "feeds": [
+        {
+          "url": "https://www.jawa.eu/motocykly-jawa",
+          "parser": "jawa",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "ok",
+          "sha256": "a681ac3decf0f628ab621dc38ab156d7b8f42a3b6cc365077b931b3d6e7e12f3",
+          "importedAt": "2026-11-08T18:45:24.675977+00:00"
+        }
+      ],
+      "slug": "jawa",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "Pronar",
+      "country": "Polsko",
+      "catalog": "https://pronar.pl/pdf/Katalog_PRZYCZEPY-PRONAR_2026.pdf",
+      "logo": "brand-logos/pronar.png",
+      "logoUrl": "https://pronar.pl/wp-content/uploads/2013/09/logo2013.png",
+      "feeds": [
+        {
+          "url": "https://pronar.pl/pdf/Katalog_PRZYCZEPY-PRONAR_2026.pdf",
+          "parser": "seeds",
+          "format": "pdf",
+          "models": [
+            "T653",
+            "T653/1",
+            "T653/2",
+            "T672",
+            "T672 eco",
+            "T672/1",
+            "T672/2",
+            "T680",
+            "T680 Special",
+            "T669",
+            "T669/1",
+            "T669XL",
+            "T700",
+            "T700M",
+            "T700M/1",
+            "T700XL"
+          ],
+          "verification": "official-catalog",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "unavailable"
+        }
+      ],
+      "slug": "pronar",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "Zetor",
+      "manufacturer": "ZETOR TRACTORS a.s.",
+      "country": "Česko",
+      "catalog": "https://www.zetor.cz/produkty",
+      "logo": "brand-logos/zetor.png",
+      "logoUrl": "https://www.zetor.cz/data/files/loga/barevna/Zetor_logo_red.png",
+      "feeds": [
+        {
+          "url": "https://www.zetor.cz/produkty",
+          "parser": "zetor",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "ok",
+          "sha256": "06c63ff98258afa4a2f7bef89ba5ab82175841df318f45d208dd952e66880499",
+          "importedAt": "2026-11-08T18:45:24.675977+00:00"
+        }
+      ],
+      "slug": "zetor",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "Agados spol. s r.o.",
+      "manufacturer": "AGADOS, spol. s r.o.",
+      "country": "Česko",
+      "catalog": "https://www.agados.cz/skladove-privesy/",
+      "logo": "brand-logos/agados.png",
+      "logoUrl": "https://www.agados.cz/frontend/templates/basic/assets/img/logo.png?t=2",
+      "feeds": [
+        {
+          "url": "https://www.agados.cz/skladove-privesy/",
+          "parser": "agados",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "ok",
+          "sha256": "614e2a64b468efce4eda342f270bd4a80fd99b8640a815025737470864e14745",
+          "importedAt": "2026-11-08T18:45:24.675977+00:00"
+        }
+      ],
+      "slug": "agados",
+      "logoStatus": "official-site",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "Thule",
+      "manufacturer": "Thule Trailers A/S",
+      "country": "Dánsko",
+      "catalog": "https://cramersale.dk/pdf/brenderup.pdf",
+      "logo": "brand-logos/thule.svg",
+      "logoUrl": null,
+      "archive": true,
+      "feeds": [
+        {
+          "url": "https://cramersale.dk/pdf/brenderup.pdf",
+          "parser": "seeds",
+          "format": "pdf",
+          "models": [
+            "5420 ATB"
+          ],
+          "verification": "historical-catalog",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "ok",
+          "sha256": "4c812ec2588580aeef3e3e77282257b790245f8b1b58fa0fbcd4ad66294adb39",
+          "importedAt": "2026-11-08T18:45:24.675977+00:00"
+        },
+        {
+          "url": "https://www.utanfutobazis.hu/adat/fajlok/ellebi-utanfuto-arlista-2013.pdf",
+          "parser": "seeds",
+          "format": "pdf",
+          "models": [
+            "LBC 5420 TB"
+          ],
+          "verification": "historical-catalog",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "unavailable"
+        }
+      ],
+      "slug": "thule",
+      "logoStatus": "brand-reference",
+      "verifiedAt": "2026-11-08"
+    },
+    {
+      "name": "BSS, n. p. OZ Senice n. H.",
+      "country": "Československo",
+      "catalog": "https://www.senicenahane.cz/cs/obec/historie/",
+      "logo": null,
+      "logoUrl": null,
+      "archive": true,
+      "logoStatus": "unverified",
+      "feeds": [
+        {
+          "url": "https://www.verejnedrazby.cz/data/file_5626_1.pdf",
+          "parser": "seeds",
+          "format": "pdf",
+          "models": [
+            "P 93 S"
+          ],
+          "verification": "historical-document",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "unavailable"
+        },
+        {
+          "url": "https://www.verejnedrazby.cz/data/file_6002_2.pdf",
+          "parser": "seeds",
+          "format": "pdf",
+          "models": [
+            "PS2 16.12"
+          ],
+          "verification": "historical-document",
+          "checkedAt": "2026-11-08T18:45:24.675977+00:00",
+          "status": "unavailable"
+        }
+      ],
+      "slug": "bss-senice",
+      "verifiedAt": "2026-11-08"
+    }
+  ]
+}
