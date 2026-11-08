@@ -25,7 +25,7 @@ window.STKApp={
  storageSnapshot:()=>STKLocal.read(),
  getVehicles(){return structuredClone(items)},
  async setVehicles(data){if(!await persist(data))throw Error(localError||'Místní zápis selhal.');render()},
- async reloadLocal(){if(modal.open||localSaving)return;const fresh=await STKLocal.read();items=fresh.vehicles;localInfo=fresh.info;localError='';render()},
+ async reloadLocal(){if(modal.open||localSaving)return;const fresh=await STKLocal.read();if(fresh.info.revision===localInfo.revision)return;items=fresh.vehicles;localInfo=fresh.info;localError='';render()},
  storageInfo:()=>({...localInfo}),
  isEditing:()=>modal.open||localSaving,notify:toast
 };
