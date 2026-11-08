@@ -173,3 +173,5 @@ All marks identify selected manufacturers; no endorsement or affiliation is clai
 
 ## Cloud SDK and shared synchronization logic
 Supabase JS 2.117.3 browser bundle and its notices were copied unchanged from pilazeleznice-coder/evidence-rozvozu-app. See vendor/LICENSES.txt for the upstream MIT notices. sync-model.js reuses the same reconciliation algorithm with a separate STK global namespace; its database namespace is independent.
+
+Zetor: logo from https://www.zetor.cz/pro-media (ZETOR TRACTORS a.s.; trademark). Selected tractor model names from https://www.zetor.cz/produkty and the official Zetor model shop https://www.eshop.zetor.cz/cs/hracky-a-modely/modely-traktoru-zetor/. Additional types can be entered manually.
