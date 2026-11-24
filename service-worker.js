@@ -1,4 +1,4 @@
-const CACHE='pila-evidence-stk-v26';
+const CACHE='pila-evidence-stk-v27';
 const BASE=new URL('./',self.location).href;
 const FILES=[
  './','index.html','local-store.js?v=15','parts-module.css?v=4',
@@ -9,7 +9,7 @@ const FILES=[
  'brand-logos/manitou.png','brand-logos/john-deere.svg',
  'brand-logos/jawa.png','brand-logos/thule.svg','brand-logos/pronar.png',
  'brand-logos/zetor.png','brand-logos/agados.png','manufacturer-sources.json',
- 'logo.png','manifest.webmanifest?v=2','icons/central-192.png','icons/central-512.png'
+ 'logo.png','manifest.webmanifest?v=3','icons/central-192.png?v=3','icons/central-512.png?v=3'
 ];
 
 self.addEventListener('install',event=>{
