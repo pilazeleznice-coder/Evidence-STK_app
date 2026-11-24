@@ -10,7 +10,7 @@ function moduleWithDom(){
   addEventListener(){},
   body:{append(){}},
   createElement(){
-   dialog={innerHTML:'',open:false,scrollTop:0,setAttribute(){},addEventListener(){},showModal(){this.open=true;},querySelector(){return {focus(){}};}};
+   dialog={innerHTML:'',open:false,scrollTop:0,dataset:{},setAttribute(){},addEventListener(){},showModal(){this.open=true;},querySelector(){return {focus(){}};}};
    return dialog;
   }
  };

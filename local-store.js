@@ -33,6 +33,8 @@ function validInventory(data){
   if(!item||typeof item.id!=='string'||!item.id||ids.has(item.id)||
    typeof item.name!=='string'||!item.name.trim()||typeof item.typeId!=='string'||
    !Array.isArray(item.machineIds)||item.machineIds.some(x=>typeof x!=='string')||
+   (item.scannerCode!=null&&!/^\d{8}$/.test(item.scannerCode))||
+   (item.scannerPending!=null&&typeof item.scannerPending!=='boolean')||
    !Number.isInteger(item.stock)||item.stock<0||!Number.isInteger(item.needed)||item.needed<=0||
    (item.price!=null&&(!Number.isFinite(item.price)||item.price<0))||
    !['active','ordered','unavailable','retired'].includes(item.status)||
