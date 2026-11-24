@@ -12,11 +12,11 @@ Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 - Katalog značek/modelů VehiclesDB a vybrané zdrojově doložené modely Manitou, John Deere, Jawa, Thule a Pronar. Nejde o úplnou historickou databázi ani registr podle SPZ. Vlastní typ lze dopsat.
 - Loga pěti uvedených výrobců jsou součástí aplikace v brand-logos/; nejsou závislá na cizích serverech. Loga jsou pouze identifikace výrobce, nikoli vyjádření spolupráce.
 - Záloha JSON včetně místních fotografií. Import zálohy a automatické notifikace zatím nejsou implementovány.
-- Modul Díly a sklad: vlastní kategorie zařízení/strojů a druhů dílů, přímé přiřazení k vozidlům STK, více webových odkazů a čárových kódů, odborné značení, potřebný počet kusů, zásoba, cena, stav, fotografie, poznámka a filtrování.
+- Modul Díly a sklad: samostatně přidávaná zařízení/stroje a vlastní druhy dílů, více webových odkazů a čárových kódů, odborné značení, potřebný počet kusů, zásoba, cena, stav, fotografie, poznámka a filtrování.
 
 ## Díly a sklad
 
-Nový druh dílu nebo zařízení/stroj lze založit tlačítkem v přehledu skladu nebo přímo při vyplňování dílu; v rozepsaném formuláři se nový záznam hned vybere. Přejmenování a mazání je ve „Spravovat kategorie“. Vozidla z evidence STK se jako zařízení nabízejí automaticky; vlastní stroje lze doplnit. Přednastavené druhy (řemenice, řemeny, tlakové spínače, ložiska, oleje, filtry) lze rozšířit vlastními. Použitou vlastní kategorii nelze smazat, dokud z ní díly nepřeřadíte. Při vymazání vozidla zůstane díl zachován a jeho dřívější vazba je označená.
+Nový druh dílu nebo zařízení/stroj lze založit tlačítkem v přehledu skladu nebo přímo při vyplňování dílu; v rozepsaném formuláři se nový záznam hned vybere. Přejmenování a mazání je ve „Spravovat kategorie“. Zařízení a stroje se vedou samostatně, bez automatického načítání vozidel z evidence STK. Starší vazby už uložených dílů na vozidla STK se zachovají pouze u těchto dílů a lze je v jejich úpravě odebrat. Přednastavené druhy (řemenice, řemeny, tlakové spínače, ložiska, oleje, filtry) lze rozšířit vlastními. Použitou vlastní kategorii nelze smazat, dokud z ní díly nepřeřadíte. Při vymazání vozidla zůstane díl zachován a jeho starší vazba je označená.
 
 Sklad je dostupný offline. Díly a kategorie se ukládají atomicky společně s vozidly v IndexedDB; po přihlášení se synchronizují přes existující STK tabulky jako samostatné záznamy `kind=setting` s prefixem `parts:`. Fotografie používají stejný soukromý bucket a kontrolu integrity. Záloha JSON obsahuje vozidla, díly, kategorie a místní fotografie. Zadávání a vyhledávání čárových kódů funguje; napojení na samostatný generátor kódů zatím není součástí modulu.
 
