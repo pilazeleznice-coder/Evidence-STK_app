@@ -16,7 +16,7 @@ Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 
 ## Díly a sklad
 
-Kategorie se zakládají a přejmenovávají přes „Spravovat kategorie“. Vozidla z evidence STK se jako zařízení nabízejí automaticky; vlastní stroje lze doplnit. Přednastavené druhy (řemenice, řemeny, tlakové spínače, ložiska, oleje, filtry) lze rozšířit vlastními. Použitou vlastní kategorii nelze smazat, dokud z ní díly nepřeřadíte. Při vymazání vozidla zůstane díl zachován a jeho dřívější vazba je označená.
+Nový druh dílu nebo zařízení/stroj lze založit tlačítkem v přehledu skladu nebo přímo při vyplňování dílu; v rozepsaném formuláři se nový záznam hned vybere. Přejmenování a mazání je ve „Spravovat kategorie“. Vozidla z evidence STK se jako zařízení nabízejí automaticky; vlastní stroje lze doplnit. Přednastavené druhy (řemenice, řemeny, tlakové spínače, ložiska, oleje, filtry) lze rozšířit vlastními. Použitou vlastní kategorii nelze smazat, dokud z ní díly nepřeřadíte. Při vymazání vozidla zůstane díl zachován a jeho dřívější vazba je označená.
 
 Sklad je dostupný offline. Díly a kategorie se ukládají atomicky společně s vozidly v IndexedDB; po přihlášení se synchronizují přes existující STK tabulky jako samostatné záznamy `kind=setting` s prefixem `parts:`. Fotografie používají stejný soukromý bucket a kontrolu integrity. Záloha JSON obsahuje vozidla, díly, kategorie a místní fotografie. Zadávání a vyhledávání čárových kódů funguje; napojení na samostatný generátor kódů zatím není součástí modulu.
 
