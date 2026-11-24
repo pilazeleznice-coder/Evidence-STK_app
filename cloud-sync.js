@@ -99,7 +99,8 @@ async function perform(force){
   await uploadPhotos();await capture();await save();await send();const pulled=await pull();state.lastSync=new Date().toISOString();state.waitingForForm=!pulled;await save();return Object.keys(state.outbox).length===0&&pulled;
  }catch(e){lastError=e.message||'Synchronizace se nezdařila. Změny zůstávají v zařízení.';console.warn('STK sync:',lastError);return false;}finally{busy=false;paint();}
 }
-async function sync(force=false){if(lockPending||busy)return false;lockPending=true;try{return navigator.locks?await navigator.locks.request('pz-stk-sync',()=>perform(force)):await perform(force);}finally{lockPending=false;}}
+async function sync(force=false){if(lockPending||busy)return false;lockPending=true;try{const done=navigator.locks?await navigator.locks.request('pz-stk-sync',()=>perform(force)):await perform(force);if(done)queueMicrotask(()=>window.STKParts?.publishPending());return done;}finally{lockPending=false;}}
+async function scannerSession(){await initialized;await authReady;const {data,error}=await client.auth.getSession();if(error)throw error;const session=data?.session;if(!session)return null;if(!state)throw Error('Nejprve vyčkejte na propojení STK se svým účtem.');if(state.owner!==session.user.id)throw Error('Evidence dílů patří jinému účtu. Přihlaste se původním účtem.');return session;}
 function queue(){if(applying)return;clearTimeout(timer);timer=setTimeout(()=>sync(),700);}
 window.addEventListener('stk-local-change',()=>{if(applying)return;localVersion++;dirty=true;queue();paint();});
 window.addEventListener('storage',e=>{if(e.key==='pila-stk-vehicles-v1'){localVersion++;if(!App.isEditing())App.reloadLocal();queue();}});window.addEventListener('stk-local-external',()=>{localVersion++;dirty=true;queue();paint()});window.addEventListener('online',()=>sync());
@@ -128,5 +129,5 @@ async function recoveryCandidates(existingIds=[]){
  const run=async()=>{busy=true;paint();try{await bind();checkOwner();cloudClient=client;const owner=state.owner,known=new Set(existingIds),map={};const current=await client.from('stk_sync_entries').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').order('revision',{ascending:false}).limit(1000);if(current.error)throw current.error;checkOwner();const older=await client.from('stk_sync_history').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').eq('deleted',false).order('revision',{ascending:false}).limit(1000);if(older.error)throw older.error;checkOwner();for(const row of [...(current.data||[]),...(older.data||[])].sort((a,b)=>b.revision-a.revision)){if(row.deleted||known.has(row.id)||map[M.key('vehicle',row.id)])continue;map[M.key('vehicle',row.id)]={kind:'vehicle',id:row.id,payload:row.payload};}const full=await hydrate(map);checkOwner();return full.vehicles;}finally{busy=false;paint();}};
  return navigator.locks?await navigator.locks.request('pz-stk-sync',run):await run();
 }
-window.STKCloud={sync,paint,client,recoveryCandidates};Promise.all([initialized,authReady]).then(()=>{paint();sync();}).catch(()=>paint());
+window.STKCloud={sync,paint,client,recoveryCandidates,scannerSession};Promise.all([initialized,authReady]).then(()=>{paint();sync();}).catch(()=>paint());
 })();
