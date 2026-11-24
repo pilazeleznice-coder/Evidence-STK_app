@@ -13,6 +13,15 @@ test('inventory keeps multiple machines, links and codes and rejects malformed r
  const bad=sample();bad.parts[0].stock=-1;assert.throws(()=>inventory(bad),/poškozený/);
  const duplicate=sample();duplicate.partCategories.push({...duplicate.partCategories[0]});assert.throws(()=>inventory(duplicate),/poškozená/);
 });
+test('inventory accepts fractional litres and keeps older records without a unit',()=>{
+ const litres=sample();litres.parts[0].unit='l';litres.parts[0].stock=2.75;litres.parts[0].needed=0.5;
+ const saved=inventory(litres);assert.equal(saved.parts[0].stock,2.75);assert.equal(saved.parts[0].unit,'l');
+ const old=sample();delete old.parts[0].unit;assert.equal(inventory(old).parts[0].stock,3);
+ for(const [unit,stock] of [['ks',2.5],['l',2.1234],['unknown',2]]){
+  const invalid=sample();invalid.parts[0].unit=unit;invalid.parts[0].stock=stock;
+  assert.throws(()=>inventory(invalid),/poškozený/);
+ }
+});
 test('namespaced parts coexist with vehicles and resolve simultaneous edits',()=>{
  const state=sync.empty('owner'),vehicle={kind:'vehicle',id:'v1',payload:{id:'v1',name:'Traktor',spz:'A1'}},part={kind:'setting',id:'parts:part:p1',payload:sample().parts[0]},category={kind:'setting',id:'parts:category:m1',payload:sample().partCategories[0]};
  const records={[sync.key(vehicle.kind,vehicle.id)]:vehicle,[sync.key(part.kind,part.id)]:part,[sync.key(category.kind,category.id)]:category};

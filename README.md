@@ -1,4 +1,4 @@
-# Evidence STK – Pila Železnice
+# Centrální evidence – Pila Železnice
 
 Instalovatelná aplikace pro firemní vozidla, přívěsy, stroje a díly potřebné pro opravy.
 
@@ -12,7 +12,7 @@ Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 - Katalog značek/modelů VehiclesDB a vybrané zdrojově doložené modely Manitou, John Deere, Jawa, Thule a Pronar. Nejde o úplnou historickou databázi ani registr podle SPZ. Vlastní typ lze dopsat.
 - Loga pěti uvedených výrobců jsou součástí aplikace v brand-logos/; nejsou závislá na cizích serverech. Loga jsou pouze identifikace výrobce, nikoli vyjádření spolupráce.
 - Záloha JSON včetně místních fotografií. Import zálohy a automatické notifikace zatím nejsou implementovány.
-- Modul Díly a sklad: samostatně přidávaná zařízení/stroje a vlastní druhy dílů, více webových odkazů a čárových kódů, odborné značení, potřebný počet kusů, zásoba, cena, stav, fotografie, poznámka a filtrování.
+- Modul Díly a sklad: samostatně přidávaná zařízení/stroje a vlastní druhy dílů, více webových odkazů a čárových kódů, odborné značení, potřebné množství, zásoba, cena, stav, fotografie, poznámka a filtrování. Jednotky jsou kusy, litry, kilogramy, metry, balení, páry a sady; měrné jednotky umožňují tři desetinná místa.
 
 ## Díly a sklad
 
