@@ -1,4 +1,4 @@
-const CACHE='pila-evidence-stk-v25';
+const CACHE='pila-evidence-stk-v26';
 const BASE=new URL('./',self.location).href;
 const FILES=[
  './','index.html','local-store.js?v=15','parts-module.css?v=4',
