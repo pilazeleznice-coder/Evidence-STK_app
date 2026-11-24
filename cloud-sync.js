@@ -26,15 +26,22 @@ async function normalizePhoto(value){
  const old=await tx('photos','readonly',s=>s.get(ref.path));if(!old)await tx('photos','readwrite',s=>s.put({ref,data:value,uploaded:false},ref.path));photoHashes.set(value,ref);return ref;
 }
 async function snapshot(){
- const out={};for(const vehicle of (App.storageSnapshot?(await App.storageSnapshot()).vehicles:App.getVehicles())){
+ const out={},local=await App.storageSnapshot();for(const vehicle of local.vehicles){
   if(!vehicle.id)throw Error('Vozidlu chybí identifikátor. Obnovte aplikaci.');
   const payload=structuredClone(vehicle);payload.photo=await normalizePhoto(vehicle.photo);out[M.key('vehicle',vehicle.id)]={kind:'vehicle',id:vehicle.id,payload};
- }return out;
+ }
+ for(const part of local.parts){const payload=structuredClone(part);payload.photo=await normalizePhoto(part.photo);const id='parts:part:'+part.id;out[M.key('setting',id)]={kind:'setting',id,payload};}
+ for(const category of local.partCategories){const id='parts:category:'+category.id;out[M.key('setting',id)]={kind:'setting',id,payload:structuredClone(category)};}
+ // Other modules may also use setting records. Keep their last known payloads intact.
+ for(const [key,value] of Object.entries(state?.seen||{}))if(key.startsWith('setting:')&&!key.startsWith('setting:parts:part:')&&!key.startsWith('setting:parts:category:')&&!out[key]){
+  const id=key.slice('setting:'.length);out[key]={kind:'setting',id,payload:JSON.parse(value)};
+ }
+ return out;
 }
 async function capture(){if(!state)return null;for(let attempt=0;attempt<4;attempt++){const before=localVersion,map=await snapshot();if(before!==localVersion)continue;M.capture(state,map,uuid);return map;}throw Error('Data se právě mění. Synchronizace bude pokračovat za chvíli.');}
 async function bind(){
- if(!user)return false;if(state&&state.owner!==user.id)throw Error('V zařízení jsou vozidla jiného účtu. Přihlaste se původním účtem; data nebyla odeslána.');
- if(!state){await tx('state','readwrite',s=>s.put({at:new Date().toISOString(),vehicles:App.getVehicles()},'before-first-sync'));state=M.empty(user.id);await capture();await save();}return true;
+ if(!user)return false;if(state&&state.owner!==user.id)throw Error('V zařízení je evidence jiného účtu. Přihlaste se původním účtem; data nebyla odeslána.');
+ if(!state){const local=await App.storageSnapshot();await tx('state','readwrite',s=>s.put({at:new Date().toISOString(),vehicles:local.vehicles,parts:local.parts,partCategories:local.partCategories},'before-first-sync'));state=M.empty(user.id);await capture();await save();}return true;
 }
 function checkOwner(){if(!user||user.id!==state?.owner)throw Error('Účet se změnil. Přihlaste se účtem vlastníka místní evidence.');}
 async function uploadPhotos(){checkOwner();
@@ -48,13 +55,24 @@ async function uploadPhotos(){checkOwner();
  }
 }
 async function hydrate(map){
- const vehicles=[];for(const record of Object.values(map)){
-  if(record.kind!=='vehicle')continue;const vehicle=structuredClone(record.payload);if(!vehicle||typeof vehicle!=='object'||vehicle.id!==record.id||typeof vehicle.name!=='string'||typeof vehicle.spz!=='string'||(vehicle.history!==undefined&&!Array.isArray(vehicle.history)))throw Error('Server vrátil neplatný záznam vozidla. Místní evidence zůstala zachovaná.');const ref=vehicle.photo;
-  if(ref){if(!validPhoto(ref))throw Error('Server vrátil neplatnou fotografii.');let entry=await tx('photos','readonly',s=>s.get(ref.path));
-   if(!entry){const {data,error}=await cloudClient.storage.from('stk-photos').download(ref.path);if(error)throw Error('Fotografii se nepodařilo stáhnout. Zkuste synchronizaci znovu.');if(data.size!==ref.size||await digest(data)!==ref.hash)throw Error('Kontrola stažené fotografie selhala.');entry={ref,data:await dataUrl(new Blob([data],{type:ref.type})),uploaded:true};await tx('photos','readwrite',s=>s.put(entry,ref.path));}
-   vehicle.photo=entry.data;photoHashes.set(entry.data,ref);
-  }else delete vehicle.photo;vehicles.push(vehicle);
- }return vehicles;
+ const result={vehicles:[],parts:[],partCategories:[]};
+ async function photoFor(ref){
+  if(!ref)return null;if(!validPhoto(ref))throw Error('Server vrátil neplatnou fotografii.');let entry=await tx('photos','readonly',s=>s.get(ref.path));
+  if(!entry){const {data,error}=await cloudClient.storage.from('stk-photos').download(ref.path);if(error)throw Error('Fotografii se nepodařilo stáhnout. Zkuste synchronizaci znovu.');if(data.size!==ref.size||await digest(data)!==ref.hash)throw Error('Kontrola stažené fotografie selhala.');entry={ref,data:await dataUrl(new Blob([data],{type:ref.type})),uploaded:true};await tx('photos','readwrite',s=>s.put(entry,ref.path));}
+  photoHashes.set(entry.data,ref);return entry.data;
+ }
+ for(const record of Object.values(map)){
+  if(record.kind==='vehicle'){
+   const vehicle=structuredClone(record.payload);if(!vehicle||typeof vehicle!=='object'||vehicle.id!==record.id||typeof vehicle.name!=='string'||typeof vehicle.spz!=='string'||(vehicle.history!==undefined&&!Array.isArray(vehicle.history)))throw Error('Server vrátil neplatný záznam vozidla. Místní evidence zůstala zachovaná.');
+   const photo=await photoFor(vehicle.photo);if(photo)vehicle.photo=photo;else delete vehicle.photo;result.vehicles.push(vehicle);
+  }else if(record.kind==='setting'&&record.id.startsWith('parts:part:')){
+   const part=structuredClone(record.payload);if(!part||part.id!==record.id.slice(11))throw Error('Server vrátil neplatný díl. Místní evidence zůstala zachovaná.');
+   const photo=await photoFor(part.photo);if(photo)part.photo=photo;else delete part.photo;result.parts.push(part);
+  }else if(record.kind==='setting'&&record.id.startsWith('parts:category:')){
+   const category=structuredClone(record.payload);if(!category||category.id!==record.id.slice(15))throw Error('Server vrátil neplatnou kategorii dílů. Místní evidence zůstala zachovaná.');result.partCategories.push(category);
+  }
+ }
+ return result;
 }
 async function send(){
  const operations=Object.entries(state.outbox).filter(([key])=>!state.conflicts[key]).map(([,op])=>structuredClone(op));
@@ -67,12 +85,12 @@ async function pull(){
  for(let page=0;page<100;page++){
   const {data,error}=await cloudClient.from('stk_sync_entries').select('*').eq('user_id',state.owner).gt('revision',state.cursor).order('revision').limit(100);if(error)throw error;if(!data.length)return true;
   const map=await capture(),version=localVersion,next=structuredClone(state);M.receive(next,map,data);
-  const vehicles=await hydrate(map);checkOwner();if(App.isEditing()||version!==localVersion)return false;
-  const previous=state;try{applying=true;await App.setVehicles(vehicles);state=next;await save();}catch(e){state=previous;throw e;}finally{applying=false;}
+  const full=await hydrate(map);checkOwner();if(App.isEditing()||version!==localVersion)return false;
+  const previous=state;try{applying=true;await App.setSnapshot(full);state=next;await save();}catch(e){state=previous;throw e;}finally{applying=false;}
   if(data.length<100)return true;
  }throw Error('Na serveru je více změn. Spusťte synchronizaci znovu.');
 }
-async function restoreLostLocal(){if(!state||!App.storageSnapshot)return;const local=await App.storageSnapshot();if(local.info.revision!==0||local.vehicles.length)return;if(user&&user.id!==state.owner)throw Error('Záloha patří jinému účtu. Přihlaste se původním účtem.');const map={};for(const [key,value] of Object.entries(state.seen||{})){const split=key.indexOf(':');map[key]={kind:key.slice(0,split),id:key.slice(split+1),payload:JSON.parse(value)}}for(const [key,op] of Object.entries(state.outbox||{})){if(op.deleted)delete map[key];else map[key]={kind:op.kind,id:op.id,payload:structuredClone(op.payload)}}if(!Object.keys(map).length)return;const vehicles=await hydrate(map);applying=true;try{await App.setVehicles(vehicles)}finally{applying=false}App.notify?.('Vozidla byla obnovena z místní zálohy synchronizace.');}
+async function restoreLostLocal(){if(!state||!App.storageSnapshot)return;const local=await App.storageSnapshot();if(local.info.revision!==0||local.vehicles.length||local.parts.length||local.partCategories.length)return;if(user&&user.id!==state.owner)throw Error('Záloha patří jinému účtu. Přihlaste se původním účtem.');const map={};for(const [key,value] of Object.entries(state.seen||{})){const split=key.indexOf(':');map[key]={kind:key.slice(0,split),id:key.slice(split+1),payload:JSON.parse(value)}}for(const [key,op] of Object.entries(state.outbox||{})){if(op.deleted)delete map[key];else map[key]={kind:op.kind,id:op.id,payload:structuredClone(op.payload)}}if(!Object.keys(map).length)return;const full=await hydrate(map);applying=true;try{await App.setSnapshot(full)}finally{applying=false}App.notify?.('Evidence byla obnovena z místní zálohy synchronizace.');}
 async function perform(force){
  if(busy)return false;busy=true;lastError='';paint();
  try{await initialized;await authReady;const saved=await tx('state','readonly',s=>s.get('main'));if(saved)state=saved;await restoreLostLocal();if(!App.isEditing())await App.reloadLocal();
@@ -87,27 +105,27 @@ window.addEventListener('stk-local-change',()=>{if(applying)return;localVersion+
 window.addEventListener('storage',e=>{if(e.key==='pila-stk-vehicles-v1'){localVersion++;if(!App.isEditing())App.reloadLocal();queue();}});window.addEventListener('stk-local-external',()=>{localVersion++;dirty=true;queue();paint()});window.addEventListener('online',()=>sync());
 setInterval(()=>{if(!document.hidden)sync();},20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync();});
 function addButton(parent,label,fn){const b=document.createElement('button');b.type='button';b.className='btn light';b.textContent=label;b.onclick=fn;parent.append(b);return b;}
-function describe(record){if(record?.deleted)return 'Odstraněno';const p=record?.payload||{};return [p.name,p.spz,p.date?'STK: '+p.date:'',p.em?'Emise: '+p.em:'',p.note].filter(Boolean).join(' · ');}
+function describe(record){if(record?.deleted)return 'Odstraněno';const p=record?.payload||{};return [p.name,p.spz,p.spec,p.date?'STK: '+p.date:'',p.em?'Emise: '+p.em:'',p.note].filter(Boolean).join(' · ');}
 async function resolve(key,choice){
- if(busy||lockPending||App.isEditing())return;const run=async()=>{busy=true;paint();try{await initialized;checkOwner();const saved=await tx('state','readonly',s=>s.get('main'));if(saved)state=saved;const map=await capture(),before=localVersion,next=structuredClone(state);if(!M.resolve(next,map,key,choice,uuid))return;const vehicles=await hydrate(map);if(before!==localVersion)throw Error('Vozidla se mezitím změnila. Zvolte verzi znovu.');applying=true;await App.setVehicles(vehicles);state=next;await save();lastError='';}catch(e){lastError=e.message;}finally{applying=false;busy=false;paint();}};
+ if(busy||lockPending||App.isEditing())return;const run=async()=>{busy=true;paint();try{await initialized;checkOwner();const saved=await tx('state','readonly',s=>s.get('main'));if(saved)state=saved;const map=await capture(),before=localVersion,next=structuredClone(state);if(!M.resolve(next,map,key,choice,uuid))return;const full=await hydrate(map);if(before!==localVersion)throw Error('Evidence se mezitím změnila. Zvolte verzi znovu.');applying=true;await App.setSnapshot(full);state=next;await save();lastError='';}catch(e){lastError=e.message;}finally{applying=false;busy=false;paint();}};
  if(navigator.locks)await navigator.locks.request('pz-stk-sync',run);else await run();queue();
 }
 function paint(){
  const badge=document.querySelector('header .demo');const conflicts=Object.keys(state?.conflicts||{}).length,pending=Object.keys(state?.outbox||{}).length;
  if(badge)badge.textContent=busy?'SYNCHRONIZUJI…':lastError?'CLOUD · ZKONTROLOVAT':conflicts?'CLOUD · SOUBĚŽNÁ ZMĚNA':!user?'ULOŽENO V ZAŘÍZENÍ':state?.waitingForForm?'CLOUD · ČEKÁ NA ZAVŘENÍ FORMULÁŘE':pending||dirty?'CLOUD · ČEKÁ NA ODESLÁNÍ':!state?.lastSync?'CLOUD · ČEKÁ NA PRVNÍ SYNCHRONIZACI':'CLOUD · SYNCHRONIZOVÁNO';
  const host=document.getElementById('stk-cloud-settings');if(!host)return;if(!user&&host.querySelector('.cloud-login')){const status=host.querySelector('.cloud-status');if(status&&lastError)status.textContent=lastError;return;}host.replaceChildren();const box=document.createElement('section');box.className='cloud-setting';host.append(box);
- const title=document.createElement('h2');title.textContent='Cloudová synchronizace';box.append(title);const intro=document.createElement('p');intro.textContent='Použijte stejný účet jako v Evidenci rozvozů. Vozidla, fotografie a historie STK se propojí mezi vašimi zařízeními.';box.append(intro);
- const status=document.createElement('p');status.className='cloud-status';status.textContent=lastError||(!user?'Zatím nepřihlášeno. Evidence funguje i místně.':busy?'Probíhá synchronizace…':conflicts?'Vyberte verzi souběžně upraveného vozidla níže.':pending?pending+' změn čeká na odeslání.':state?.waitingForForm?'Stažené změny se použijí po zavření formuláře.':state?.lastSync?'Naposledy synchronizováno '+new Date(state.lastSync).toLocaleString('cs-CZ'):'Připojeno k účtu.');box.append(status);
+ const title=document.createElement('h2');title.textContent='Cloudová synchronizace';box.append(title);const intro=document.createElement('p');intro.textContent='Použijte stejný účet jako v Evidenci rozvozů. Vozidla, díly, kategorie, fotografie a historie se propojí mezi vašimi zařízeními.';box.append(intro);
+ const status=document.createElement('p');status.className='cloud-status';status.textContent=lastError||(!user?'Zatím nepřihlášeno. Evidence funguje i místně.':busy?'Probíhá synchronizace…':conflicts?'Vyberte verzi souběžně upraveného záznamu níže.':pending?pending+' změn čeká na odeslání.':state?.waitingForForm?'Stažené změny se použijí po zavření formuláře.':state?.lastSync?'Naposledy synchronizováno '+new Date(state.lastSync).toLocaleString('cs-CZ'):'Připojeno k účtu.');box.append(status);
  if(!user){const form=document.createElement('form');form.className='cloud-login';form.innerHTML='<label>E-mail<input type="email" name="email" autocomplete="username" required></label><label>Heslo<input type="password" name="password" autocomplete="current-password" required></label><button class="btn" type="submit">Přihlásit a synchronizovat</button>';box.append(form);form.onsubmit=async e=>{e.preventDefault();const submit=form.querySelector('button');submit.disabled=true;const email=form.elements.email.value.trim(),password=form.elements.password.value;try{const {error}=await client.auth.signInWithPassword({email,password});form.elements.password.value='';if(error)throw Error('Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo účtu Evidence.');lastError='';await sync(true);}catch(e){lastError=e.message;paint();}finally{submit.disabled=false;}};}
  else{const account=document.createElement('p');account.textContent='Přihlášený účet: '+user.email;box.append(account);const actions=document.createElement('div');actions.className='cloud-actions';box.append(actions);addButton(actions,'Synchronizovat nyní',()=>sync(true)).disabled=busy;addButton(actions,'Odhlásit účet',async()=>{const {error}=await client.auth.signOut({scope:'local'});if(error)lastError=error.message;paint();}).disabled=busy;
   const label=document.createElement('label');label.className='cloud-auto';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=enabled;toggle.onchange=()=>{enabled=toggle.checked;try{localStorage.setItem('pila-stk-cloud-auto',String(enabled));}catch{}if(enabled)sync();};label.append(toggle,document.createTextNode(' Automatická synchronizace'));box.append(label);
  }
- if(state){addButton(box,'Stáhnout původní zálohu před propojením',async()=>{const checkpoint=await tx('state','readonly',s=>s.get('before-first-sync'));if(!checkpoint)return;const blob=new Blob([JSON.stringify({app:'Evidence STK',version:1,...checkpoint},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Evidence-STK-pred-cloudem.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});}
- if(conflicts){for(const [key,conflict] of Object.entries(state.conflicts)){const card=document.createElement('article');card.className='cloud-conflict';const name=document.createElement('strong');name.textContent='Souběžná změna vozidla';card.append(name);for(const [label,record] of [['Toto zařízení',state.outbox[key]],['Cloud',conflict.remote]]){const p=document.createElement('p');p.textContent=label+': '+describe(record);card.append(p);}addButton(card,'Ponechat místní verzi',()=>resolve(key,'local'));addButton(card,'Použít verzi z cloudu',()=>resolve(key,'remote'));box.append(card);}}
+ if(state){addButton(box,'Stáhnout původní zálohu před propojením',async()=>{const checkpoint=await tx('state','readonly',s=>s.get('before-first-sync'));if(!checkpoint)return;const blob=new Blob([JSON.stringify({app:'Evidence STK',version:2,...checkpoint},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Evidence-STK-pred-cloudem.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});}
+ if(conflicts){for(const [key,conflict] of Object.entries(state.conflicts)){const card=document.createElement('article');card.className='cloud-conflict';const name=document.createElement('strong');name.textContent=key.startsWith('setting:parts:')?'Souběžná změna dílu nebo kategorie':'Souběžná změna vozidla';card.append(name);for(const [label,record] of [['Toto zařízení',state.outbox[key]],['Cloud',conflict.remote]]){const p=document.createElement('p');p.textContent=label+': '+describe(record);card.append(p);}addButton(card,'Ponechat místní verzi',()=>resolve(key,'local'));addButton(card,'Použít verzi z cloudu',()=>resolve(key,'remote'));box.append(card);}}
 }
 async function recoveryCandidates(existingIds=[]){
  await initialized;await authReady;if(!user)return [];if(busy||lockPending)throw Error('Probíhá synchronizace. Vyhledání obnovy zkuste za chvíli znovu.');
- const run=async()=>{busy=true;paint();try{await bind();checkOwner();cloudClient=client;const owner=state.owner,known=new Set(existingIds),map={};const current=await client.from('stk_sync_entries').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').order('revision',{ascending:false}).limit(1000);if(current.error)throw current.error;checkOwner();const older=await client.from('stk_sync_history').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').eq('deleted',false).order('revision',{ascending:false}).limit(1000);if(older.error)throw older.error;checkOwner();for(const row of [...(current.data||[]),...(older.data||[])].sort((a,b)=>b.revision-a.revision)){if(row.deleted||known.has(row.id)||map[M.key('vehicle',row.id)])continue;map[M.key('vehicle',row.id)]={kind:'vehicle',id:row.id,payload:row.payload};}const vehicles=await hydrate(map);checkOwner();return vehicles;}finally{busy=false;paint();}};
+ const run=async()=>{busy=true;paint();try{await bind();checkOwner();cloudClient=client;const owner=state.owner,known=new Set(existingIds),map={};const current=await client.from('stk_sync_entries').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').order('revision',{ascending:false}).limit(1000);if(current.error)throw current.error;checkOwner();const older=await client.from('stk_sync_history').select('kind,id,payload,deleted,revision').eq('user_id',owner).eq('kind','vehicle').eq('deleted',false).order('revision',{ascending:false}).limit(1000);if(older.error)throw older.error;checkOwner();for(const row of [...(current.data||[]),...(older.data||[])].sort((a,b)=>b.revision-a.revision)){if(row.deleted||known.has(row.id)||map[M.key('vehicle',row.id)])continue;map[M.key('vehicle',row.id)]={kind:'vehicle',id:row.id,payload:row.payload};}const full=await hydrate(map);checkOwner();return full.vehicles;}finally{busy=false;paint();}};
  return navigator.locks?await navigator.locks.request('pz-stk-sync',run):await run();
 }
 window.STKCloud={sync,paint,client,recoveryCandidates};Promise.all([initialized,authReady]).then(()=>{paint();sync();}).catch(()=>paint());
