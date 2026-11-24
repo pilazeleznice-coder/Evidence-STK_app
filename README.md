@@ -1,6 +1,6 @@
 # Evidence STK – Pila Železnice
 
-Instalovatelná aplikace pro firemní vozidla, přívěsy, vleky, traktory, motocykly a nakladače.
+Instalovatelná aplikace pro firemní vozidla, přívěsy, stroje a díly potřebné pro opravy.
 
 Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 
@@ -12,6 +12,13 @@ Aplikace: https://pilazeleznice-coder.github.io/Evidence-STK_app/
 - Katalog značek/modelů VehiclesDB a vybrané zdrojově doložené modely Manitou, John Deere, Jawa, Thule a Pronar. Nejde o úplnou historickou databázi ani registr podle SPZ. Vlastní typ lze dopsat.
 - Loga pěti uvedených výrobců jsou součástí aplikace v brand-logos/; nejsou závislá na cizích serverech. Loga jsou pouze identifikace výrobce, nikoli vyjádření spolupráce.
 - Záloha JSON včetně místních fotografií. Import zálohy a automatické notifikace zatím nejsou implementovány.
+- Modul Díly a sklad: vlastní kategorie zařízení/strojů a druhů dílů, přímé přiřazení k vozidlům STK, více webových odkazů a čárových kódů, odborné značení, potřebný počet kusů, zásoba, cena, stav, fotografie, poznámka a filtrování.
+
+## Díly a sklad
+
+Kategorie se zakládají a přejmenovávají přes „Spravovat kategorie“. Vozidla z evidence STK se jako zařízení nabízejí automaticky; vlastní stroje lze doplnit. Přednastavené druhy (řemenice, řemeny, tlakové spínače, ložiska, oleje, filtry) lze rozšířit vlastními. Použitou vlastní kategorii nelze smazat, dokud z ní díly nepřeřadíte. Při vymazání vozidla zůstane díl zachován a jeho dřívější vazba je označená.
+
+Sklad je dostupný offline. Díly a kategorie se ukládají atomicky společně s vozidly v IndexedDB; po přihlášení se synchronizují přes existující STK tabulky jako samostatné záznamy `kind=setting` s prefixem `parts:`. Fotografie používají stejný soukromý bucket a kontrolu integrity. Záloha JSON obsahuje vozidla, díly, kategorie a místní fotografie. Zadávání a vyhledávání čárových kódů funguje; napojení na samostatný generátor kódů zatím není součástí modulu.
 
 ## Cloud
 
@@ -58,7 +65,7 @@ Ve formuláři vozidla zvolte Načíst malý technický průkaz. Vyfoťte/vybert
 
 Vzhled používá primární barvu #104c29 převzatou z Evidence rozvozů.
 
-## Spolehlivé místní ukládání (v12)
-Vozidla a fotografie jsou v IndexedDB `pila-stk-vehicles-v2`. Původní localStorage se při prvním otevření bezpečně přenese a ponechá beze změny. Úspěch formuláře se zobrazí až po dokončení transakce; při chybě zůstane formulář otevřený. Data nejsou nejprve přidána pouze do paměti. Verze evidence brání přepsání souběžnou starší kartou. Změněné/odebrané záznamy se uchovávají v omezené místní historii (100 záznamů); Nastavení nabízí výslovnou obnovu chybějících vozidel bez přepsání stávajících. Cloud čte potvrzené místní záznamy. Při chybějícím primárním úložišti se nejprve pokusí obnovit dřívější místní deník synchronizace; nezamění tuto situaci automaticky za hromadné smazání. Historie ani migrace neobnoví data, která nebyla nikdy úspěšně zapsána a už nejsou v původní otevřené stránce.
+## Spolehlivé místní ukládání (v13)
+Vozidla, díly, kategorie a fotografie jsou v IndexedDB `pila-stk-vehicles-v2` (verze databáze 2). Aktualizace přidá nové sklady bez vymazání původních vozidel. Původní localStorage se při prvním otevření bezpečně přenese a ponechá beze změny. Úspěch formuláře se zobrazí až po dokončení transakce; při chybě zůstane formulář otevřený. Data nejsou nejprve přidána pouze do paměti. Verze evidence brání přepsání souběžnou starší kartou. Změněné/odebrané záznamy se uchovávají v omezené místní historii (150 záznamů); Nastavení nabízí výslovnou obnovu chybějících vozidel bez přepsání stávajících. Cloud čte potvrzené místní záznamy. Při chybějícím primárním úložišti se nejprve pokusí obnovit dřívější místní deník synchronizace; nezamění tuto situaci automaticky za hromadné smazání. Historie ani migrace neobnoví data, která nebyla nikdy úspěšně zapsána a už nejsou v původní otevřené stránce.
 
 Vyhledání obnovy po přihlášení prohledá také současné záznamy a nejvýše 1000 posledních starších verzí z `stk_sync_history` vlastního účtu. Jde o čtení; k přidání nalezených chybějících vozidel do evidence dojde až po výslovném potvrzení seznamu. Při nedostupném cloudu zůstává možné použít místní historii. Během právě probíhajícího zápisu aplikace varuje před opuštěním stránky a při úspěšném zápisu se podle možností prohlížeče pokusí požádat o trvalé úložiště.
