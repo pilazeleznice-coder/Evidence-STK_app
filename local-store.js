@@ -5,6 +5,11 @@ const LEGACY='pila-stk-vehicles-v1';
 let db;
 const clone=value=>structuredClone(value);
 const uuid=()=>crypto.randomUUID();
+const UNITS={ks:0,l:3,kg:3,m:3,bal:0,'pár':0,sada:0};
+function validQuantity(value,unit,positive){
+ if(!Number.isFinite(value)||(positive?value<=0:value<0)||value>1e9)return false;
+ return UNITS[unit]===0?Number.isInteger(value):Math.abs(value*1000-Math.round(value*1000))<1e-6;
+}
 
 function valid(data){
  if(!Array.isArray(data)||data.some(x=>!x||typeof x!=='object'||typeof x.name!=='string'||typeof x.spz!=='string'))
@@ -35,7 +40,7 @@ function validInventory(data){
    !Array.isArray(item.machineIds)||item.machineIds.some(x=>typeof x!=='string')||
    (item.scannerCode!=null&&!/^\d{8}$/.test(item.scannerCode))||
    (item.scannerPending!=null&&typeof item.scannerPending!=='boolean')||
-   !Number.isInteger(item.stock)||item.stock<0||!Number.isInteger(item.needed)||item.needed<=0||
+   !Object.hasOwn(UNITS,item.unit??'ks')||!validQuantity(item.stock,item.unit??'ks',false)||!validQuantity(item.needed,item.unit??'ks',true)||
    (item.price!=null&&(!Number.isFinite(item.price)||item.price<0))||
    !['active','ordered','unavailable','retired'].includes(item.status)||
    !Array.isArray(item.links)||item.links.some(x=>!x||typeof x.name!=='string'||typeof x.url!=='string')||

@@ -35,6 +35,14 @@ test('machine choices and filters use only categories added to the parts invento
  assert.match(ui.dialog().innerHTML,/Kompresor dílny/);
  assert.doesNotMatch(ui.dialog().innerHTML,/Traktor STK|vehicle:v1/);
 });
+test('litres remain selected and appear on the stock card',()=>{
+ const ui=moduleWithDom();
+ const part={id:'oil',name:'Hydraulický olej',typeId:'type:oils',machineIds:[],stock:2.75,needed:0.5,unit:'l',status:'active',links:[],barcodes:[]};
+ ui.api.setSnapshot({parts:[part],partCategories:[],vehicles:[]});ui.api.render(ui.root);
+ assert.match(ui.cards.innerHTML,/2,75 l/);assert.match(ui.cards.innerHTML,/0,5 l/);
+ ui.api.form('oil');assert.match(ui.dialog().innerHTML,/<option value="l" selected>Litry \(l\)<\/option>/);
+ assert.match(ui.dialog().innerHTML,/name="stock" value="2.75"[^>]*step="0.001"/);
+});
 
 test('an older vehicle link remains visible and selected only on its existing part',()=>{
  const ui=moduleWithDom();
