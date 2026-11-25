@@ -1,7 +1,7 @@
-const CACHE='pila-evidence-stk-v27';
+const CACHE='pila-evidence-stk-v28';
 const BASE=new URL('./',self.location).href;
 const FILES=[
- './','index.html','local-store.js?v=15','parts-module.css?v=4',
+ './','index.html','local-store.js?v=15','parts-module.css?v=5',
  'barcode-128.js?v=1','part-code-sync.js?v=1','parts-module.js?v=7',
  'spz-ocr.js?v=4','vehicle-catalog.js?v=18','document-scanner.js?v=10',
  'vehicle-catalog.json?v=16','vendor/supabase-2.117.3.js',
